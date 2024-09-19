@@ -1,0 +1,49 @@
+* {
+    font-family: "Roboto Slab", sans-serif;
+}
+
+body {
+    background-color: lightblue;
+    text-align: center;
+}
+
+h1 {
+    color: rgb(12, 58, 99);
+}
+
+.baseball-diamond {
+    width: 400px;
+    height: 375px;
+    background-image: url("./images/baseballdiamond.png");
+    background-size: contain;
+}
+
+.div-table {
+    display: table;         
+    width: auto;                
+    border-spacing: 5px; /* cellspacing:poor IE support for this */
+}
+.div-table-row {
+    display: table-row;
+    width: auto;
+    clear: both;
+}
+.div-table-cell {
+    display: table-cell;                
+    min-width: 30px;  
+    background-color: rgba(0, 0, 0, 0.808);
+    padding: 5px;
+}
+
+.noninteractive-display-div {
+    display: flex;
+    justify-content: center;
+}
+
+.scoreboard {
+    background-color: rgb(33, 75, 61);
+    border-color: white;
+    border-width: 3px;
+    border-style: solid;
+    color: rgba(255, 255, 255, 0.897);
+}

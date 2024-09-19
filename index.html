@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>H&G Grand Slam!</title>
+        <link rel="stylesheet" href="./style.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    </head>
+    <body>
+        <h1 id="main-header">Welcome to H&G Grand Slam!</h1>
+        <div id="noninteractive-display-div" class="noninteractive-display-div">
+            <div id="baseball-diamond" class="baseball-diamond">
+            </div>
+            <div id="scoreboard" class="scoreboard">
+                <div class="div-table">
+                    <div class="div-table-row" id="scoreboard-header-row">
+                        <div class="div-table-cell" id="team-name-header"> </div>
+                        <div class="div-table-cell" id="inning1-header">1</div>
+                        <div class="div-table-cell" id="inning2-header">2</div>
+                        <div class="div-table-cell" id="inning3-header">3</div>
+                        <div class="div-table-cell" id="inning4-header">4</div>
+                        <div class="div-table-cell" id="inning5-header">5</div>
+                        <div class="div-table-cell" id="inning6-header">6</div>
+                        <div class="div-table-cell" id="inning7-header">7</div>
+                        <div class="div-table-cell" id="inning8-header">8</div>
+                        <div class="div-table-cell" id="inning9-header">9</div>
+                        <div class="div-table-cell" id="inning10-header">10</div>
+                        <div class="div-table-cell" id="runs-header">R</div>
+                        <div class="div-table-cell" id="hits-header">H</div>
+                    </div>
+                    <div class="div-table-row" id="scoreboard-team1-row">
+                        <div class="div-table-cell" id="team1-name">HOME</div>
+                        <div class="div-table-cell" id="team1-inning1"></div>
+                        <div class="div-table-cell" id="team1-inning2"></div>
+                        <div class="div-table-cell" id="team1-inning3"></div>
+                        <div class="div-table-cell" id="team1-inning4"></div>
+                        <div class="div-table-cell" id="team1-inning5"></div>
+                        <div class="div-table-cell" id="team1-inning6"></div>
+                        <div class="div-table-cell" id="team1-inning7"></div>
+                        <div class="div-table-cell" id="team1-inning8"></div>
+                        <div class="div-table-cell" id="team1-inning9"></div>
+                        <div class="div-table-cell" id="team1-inning10"></div>
+                        <div class="div-table-cell" id="team1-runs"></div>
+                        <div class="div-table-cell" id="team1-hits"></div>
+                    </div>
+                    <div class="div-table-row" id="scoreboard-team2-row">
+                        <div class="div-table-cell" id="team2-name">VISITOR</div>
+                        <div class="div-table-cell" id="team2-inning1"></div>
+                        <div class="div-table-cell" id="team2-inning2"></div>
+                        <div class="div-table-cell" id="team2-inning3"></div>
+                        <div class="div-table-cell" id="team2-inning4"></div>
+                        <div class="div-table-cell" id="team2-inning5"></div>
+                        <div class="div-table-cell" id="team2-inning6"></div>
+                        <div class="div-table-cell" id="team2-inning7"></div>
+                        <div class="div-table-cell" id="team2-inning8"></div>
+                        <div class="div-table-cell" id="team2-inning9"></div>
+                        <div class="div-table-cell" id="team2-inning10"></div>
+                        <div class="div-table-cell" id="team2-runs"></div>
+                        <div class="div-table-cell" id="team2-hits"></div>
+                    </div>
+                </div>
+                <div class="div-table">
+                    <div class="div-table-row" id="scoreboard-inning-stats-row"></div>
+                        <div class="div-table-cell" id="at-bat-text">AT BAT:</div>    
+                        <div class="div-table-cell" id="at-bat-counter"></div>
+                        <div class="div-table-cell" id="strikes-text">STRIKES:</div>
+                        <div class="div-table-cell" id="strikes-counter"></div>
+                        <div class="div-table-cell" id="outs-text">OUTS:</div>
+                        <div class="div-table-cell" id="outs-counter"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="user-inputs-div">
+            <div id="team-name-inputs">
+                <label for="team1-name-input">Input team 1 name:</label>
+                <br>
+                    The <input id="team1-name-input" />
+                </br>
+                <label for="team2-name-input">Input team 2 name:</label>
+                <br>
+                    The <input id="team2-name-input" />
+                </br>
+                <br>
+                    <button id="team-names-save">Save</button>
+                </br>
+            </div>
+            <div id="swing-options" style="display: none">
+                Which Type of Hit Will You Try For?
+                <br /><button id="single">Single</button> <button id="double">Double</button>
+                <br /><button id="triple">Triple</button> <button id="homerun">Home Run</button>
+            </div>
+            <div id="questions-and-answers" style="display: none">
+                <div id="question">
+                    <strong>Question Text</strong>
+                </div>
+                <div id="answer-1">
+                    <input type="radio" name="answer-options" id="answer1Radio" />
+                    <span id="answer-1-text">Option A</span>
+                </div>
+                <div id="answer-2">
+                    <input type="radio" name="answer-options" id="answer2Radio" />
+                    <span id="answer-2-text">Option B</span>
+                </div>
+                <div id="answer-3">
+                    <input type="radio" name="answer-options" id="answer3Radio" /> 
+                    <span id="answer-3-text">Option C</span>
+                </div>
+                <div id="answer-4">
+                    <input type="radio" name="answer-options" id="answer4Radio" /> 
+                    <span id="answer-4-text">Option D</span>
+                </div>
+                <div id="answer-button-div">
+                    <button id="answer-button" name="answer-options">Submit Answer</button>
+                </div>
+            </div>
+        </div>
+        <script src="app.js"></script>
+    </body>
+</html>
