@@ -1,14 +1,19 @@
 * {
-    font-family: "Roboto Slab", sans-serif;
+    font-family: "Montserrat", sans-serif;
 }
 
 body {
-    background-color: lightblue;
+    background-color: rgb(218, 241, 231);
     text-align: center;
 }
 
 h1 {
-    color: rgb(12, 58, 99);
+    color: rgb(5, 47, 41);
+    letter-spacing: 2px;
+}
+
+input[type="radio"] {
+    transform: scale(1.5);
 }
 
 .baseball-diamond {
@@ -29,9 +34,17 @@ h1 {
     clear: both;
 }
 .div-table-cell {
-    display: table-cell;                
-    min-width: 30px;  
     background-color: rgba(0, 0, 0, 0.808);
+    border-radius: 5px;
+    display: table-cell;    
+    font-family: "Oswald", sans-serif;
+    font-size: 30px;            
+    min-width: 30px;  
+    padding: 6px;
+}
+.div-gap-table-cell {
+    display: table-cell;
+    min-width: 30px;
     padding: 5px;
 }
 
@@ -43,7 +56,56 @@ h1 {
 .scoreboard {
     background-color: rgb(33, 75, 61);
     border-color: white;
-    border-width: 3px;
+    border-radius: 15px;
     border-style: solid;
+    border-width: 3px;
     color: rgba(255, 255, 255, 0.897);
+    padding: 15px;
+}
+
+.stitched-baseball-div {
+    background-color: white;
+    border-color: red;
+    border-radius: 50px;
+    border-style: dashed;
+    border-width: 2px;
+    letter-spacing: 2px;
+    line-height: 2;
+    padding: 15px;
+    width: 50%;
+}
+.stitched-baseball-div button {
+    background-color: red;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    letter-spacing: 2px;
+    padding: 8px;
+}
+.stitched-baseball-div button:hover {
+    background-color: rgb(255, 108, 108);
+    cursor: pointer;
+}
+.stitched-baseball-div input {
+    border: 1px, solid #ccc;
+    border-radius: 10px;
+    padding: 8px;
+}
+
+#question {
+    font-weight: bold;
+}
+
+#horizontal-gap {
+    width: 20px;
+}
+
+#user-inputs-div {
+    display: flex;
+    justify-content: center;
+}
+
+#vertical-gap {
+    height: 20px;
 }

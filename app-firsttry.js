@@ -1,11 +1,3 @@
-const chargeSFX = new Audio("./sfx/charge.mp3");
-const errorSFX = new Audio(".sfx/error.wav");
-const hitSFX = new Audio("./sfx/hit.wav");
-const outSFX = new Audio("./sfx/out.wav");
-const pitchSFX = new Audio("./sfx/pitch.wav");
-const runSFX = new Audio("./sfx/run.mp3");
-const strikeSFX = new Audio("./sfx/strike.wav");
-
 let teamNamesChosen = false;
 const teamNamesSaveButton = document.getElementById("team-names-save");
 const teamNameInputsDiv = document.getElementById("team-name-inputs");
@@ -18,24 +10,23 @@ const questionsDiv = document.getElementById("questions-and-answers");
 const answerButton = document.getElementById("answer-button");
 
 let atBat = 0;
-var atBatTeam1 = 0;
-var atBatTeam2 = 0;
+let atBatTeam1 = 0;
+let atBatTeam2 = 0;
 let base1Occupied = false;
 let base2Occupied = false;
 let base3Occupied = false;
-let baseChange;
-var team1Hits = 0;
-var team2Hits = 0;
-let inning = 0;
-let maxTurns = 5;
+let team1Hits = 0;
+let team2Hits = 0;
+let inning = 1;
 let outs = 0;
-var team1RunsForCurrentInning = 0;
-var team1RunsTotal = 0;
-var team2RunsForCurrentInning = 0;
-var team2RunsTotal = 0;
+let team1RunsForCurrentInning = 0;
+let team1RunsTotal = 0;
+let team2RunsForCurrentInning = 0;
+let team2RunsTotal = 0;
 let turn = 0;
 let strikes = 0;
-var whichTeamAtBat = 1;
+let swingType;
+let whichTeamAtBat = 2;
 
 let csvRow;
 let csvCol;
@@ -91,34 +82,15 @@ Papa.parse(csvData, {
 });
 // Link the Questions and Answers CSV data to this app
 
-function getValueByIndex(data, rowIndex, columnIndex) {
-    if (rowIndex < data.length && columnIndex < Object.keys(data[0]).length) { // Check if the rowIndex and columnIndex are within bounds
-        const row = data[rowIndex];
-        const columnName = Object.keys(row)[columnIndex]; // Get the column name from the index
-        return row[columnName]; // Return the value at the specified row and column
-    }
-    return null; // Return null if indices are out of bounds
-}
-// function to get a certain question-and-answer set (i.e., a certain row) from the CSV data
-
 swingOptionsDiv.style.display = "none";
 questionsDiv.style.display = "none";
 // hide the Swing Options and Questions divs by default (i.e., when first loading up the app)
-
-const questionsDivDisappear = () => {
-    questionsDiv.style.display = "none";
-}
-// function to make the Questions div disappear
-const questionsDivAppear = () => {
-    pitchSFX.play();
-    questionsDiv.style.display = "block"
-}
-// function to make the Questions div appear
 
 const swingOptionsDisappear = () => {
     swingOptionsDiv.style.display = "none";
 }
 // function to make the Swing Options div disappear
+
 const swingOptionsAppear = () => {
     swingOptionsDiv.style.display = "block";
 }
@@ -128,15 +100,11 @@ const teamNameInputsDisappear = () => {
     teamNameInputsDiv.style.display = "none";
 }
 // function to make the Team Name Inputs div disappear
+
 const teamNameInputsAppear = () => {
     teamNameInputsDiv.style.display = "block";
 }
 // function to make the Team Name Inputs div appear
-
-const updateAtBatCount = () => {
-    window[`atBatTeam${whichTeamAtBat}`]++; // increase the at-bat count of the current team by 1
-    document.getElementById("at-bat-counter").innerHTML = window[`atBatTeam${whichTeamAtBat}`]; // apply the value of the current team's at-bat count to the appropriate div in the DOM
-}
 
 teamNamesSaveButton.addEventListener("click", () => {
     const team1Name = document.getElementById("team1-name-input").value;
@@ -145,7 +113,6 @@ teamNamesSaveButton.addEventListener("click", () => {
         document.getElementById("team1-name").innerHTML = team1Name.toUpperCase();
         document.getElementById("team2-name").innerHTML = team2Name.toUpperCase();
         teamNameInputsDisappear();
-        teamNamesChosen = true;
         playBall();
     } else {
         alert("You must enter a name for both teams!");
@@ -156,59 +123,100 @@ teamNamesSaveButton.addEventListener("click", () => {
 
 const playBall = () => {
     console.log("Play ball!");
-    document.getElementById("turns-max").innerHTML = maxTurns; // apply the value of maxTurns to the appropriate div in the DOM
-    updateHalfInning();
+    teamNamesChosen = true;
+    updateAtBatCount();
+    console.log("the updateAtBatCount in const playBall() just got called");
+    updateTurn();
+    setTotals();
     swingOptionsAppear();
 }
-// Make the swing options appear, and start a new half-inning to kick off the game
+// after team names have been chosen, make the Question Options div appear
 
-const updateHalfInning = () => {
-    if ( inning < 10 ) {
-        baseChange = 5;
-        updateBasesOccupied();
-        if ( whichTeamAtBat === 1 ) {
-            inning++; // if Team 1 was most recently at bat when a new half-inning starts, then increase the inning number by 1
-            whichTeamAtBat = 2; // if Team 1 was most recently at bat when a new half-inning starts, then Team 2 goes up to bat
-        } else {
-            whichTeamAtBat = 1; // if Team 2 was most recently at bat when a new half-inning starts, then Team 1 goes up to bat
-        }
-        window[`team${whichTeamAtBat}RunsForCurrentInning`] = 0; // set current team's runs for current inning to 0
-        document.getElementById(`team${whichTeamAtBat}-inning${inning}`).innerHTML = 0; // apply the current team's runs for the current inning to the appropriate div in the DOM
-        turn = 0; // take the turn count down to 0 and then...
-        updateTurn(); // call updateTurn to increase the turn count to 1 for the new team taking the field...
-        outs = 0; // start each half-inning with 0 outs
-        document.getElementById("outs-counter").innerHTML = outs; // apply the value of outs to the appropriate div in the DOM
-        document.getElementById("at-bat-counter").innerHTML = window[`atBatTeam${whichTeamAtBat}`]; // apply the value of the current team's at-bats to the appropriate div in the DOM
-        document.getElementById(`team${whichTeamAtBat}-runs`).innerHTML = window[`team${whichTeamAtBat}RunsTotal`]; // apply the value of the current team's total runs to the appropriate div in the DOM
-        document.getElementById(`team${whichTeamAtBat}-hits`).innerHTML = window[`team${whichTeamAtBat}Hits`]; // apply the value of the current team's total hits to the appropriate value in the DOM
-        swingOptionsAppear(); // make the 4 swing option buttons re-appear
-    } else {
-        alert("Good game!");
+const setTotals = () => {
+    document.getElementById("team1-runs").innerHTML = team1RunsTotal;
+    document.getElementById("team1-hits").innerHTML = team1Hits;
+    document.getElementById("team2-runs").innerHTML = team2RunsTotal;
+    document.getElementById("team2-hits").innerHTML = team2Hits;
+    document.getElementById("strikes-counter").innerHTML = 0;
+    document.getElementById("outs-counter").innerHTML = 0;
+    console.log("setTotals function just got triggered, and I the app think that whichTeamAtBat is " + whichTeamAtBat + " and inning is " + inning);
+    document.getElementById(`team${whichTeamAtBat}-inning${inning}`).innerHTML = 0;
+    if ( whichTeamAtBat === 1 ) {
+        document.getElementById("at-bat-counter").innerHTML = atBatTeam1;
+    } else if ( whichTeamAtBat === 2 ) {
+        document.getElementById("at-bat-counter").innerHTML = atBatTeam2;
     }
 }
+// set Strikes, Outs, and current inning's runs to zero at the beginning of each inning
 
 singleButton.addEventListener("click", () => {
     takeASwing(single);
-    baseChange = 1;
+    swingType = "single";
 });
 doubleButton.addEventListener("click", () => {
     takeASwing(double);
-    baseChange = 2;
+    swingType = "double";
 });
 tripleButton.addEventListener("click", () => {
     takeASwing(triple)
-    baseChange = 3;
+    swingType = "triple";
 });
 homerunButton.addEventListener("click", () => {
-    chargeSFX.play();
     takeASwing(homerun);
-    baseChange = 4;
+    swingType = "homerun";
 });
 // event listeners for different types of hit attempts (single, double, triple, or home run)
+
+const questionsDivDisappear = () => {
+    questionsDiv.style.display = "none";
+}
+// function to make the Questions div disappear
+
+const questionsDivAppear = () => {
+    questionsDiv.style.display = "block"
+}
+// function to make the Questions div appear
+
+function getValueByIndex(data, rowIndex, columnIndex) {
+    if (rowIndex < data.length && columnIndex < Object.keys(data[0]).length) { // Check if the rowIndex and columnIndex are within bounds
+        const row = data[rowIndex];
+        const columnName = Object.keys(row)[columnIndex]; // Get the column name from the index
+        return row[columnName]; // Return the value at the specified row and column
+    }
+    return null; // Return null if indices are out of bounds
+}
+// function to get a certain question-and-answer set (i.e., a certain row) from the CSV data
+
+const updateAtBatCount = () => {
+    console.log("updateAtBatCount called");
+    if ( whichTeamAtBat === 1 ) {
+        atBatTeam1++;
+        document.getElementById("at-bat-counter").textContent = atBatTeam1;
+    } else if ( whichTeamAtBat === 2) {
+        atBatTeam2++;
+        document.getElementById("at-bat-counter").textContent = atBatTeam2;
+    }
+}
+// increase the At Bat counter by 1, based on variable atBatTeam1 or atBatTeam2 (depending on which team is up to bat)
+
+const switchAtBatCount = () => {
+    if ( whichTeamAtBat === 2 ) {
+        document.getElementById("at-bat-counter").textContent = atBatTeam2;
+    } else if ( whichTeamAtBat === 1 ) {
+        document.getElementById("at-bat-counter").textContent = atBatTeam1;
+    }
+}
 
 const takeASwing = (power) => {
     swingOptionsDisappear();
     questionsDivAppear();
+    if ( atBatTeam1 === 0 && atBatTeam2 === 0) {
+        updateAtBatCount();
+        console.log("The updateAtBatCount in const takeASwing() just got called");
+    } else if ( atBatTeam1 === 0 && whichTeamAtBat === 1 ) {
+        updateAtBatCount();
+        console.log("The updateAtBatCount in const takeASwing just got called");
+    }
     if ( power === single ) {
         console.log("You swung for a single");
 
@@ -267,134 +275,191 @@ answerButton.addEventListener("click", () => {
 const correctOrIncorrect = () => {
     const selectedRadio = document.querySelector('input[name="answer-options"]:checked');
     if (!selectedRadio) {
-        alert("Please select an answer."); // if no radio button is selected, alert the user to select a radio button
+        alert("Please select an answer.");
     } else if (selectedRadio.nextElementSibling.textContent === getValueByIndex(csvDataArray, csvRow, 1)) {
         console.log("You chose correctly!");
-        hitSFX.play();
-        updateBasesOccupied(); // make sure that the appropriate bases get occupied or vacated depending on which bases were currently occupied + the power of the hit
-        updateHitsCount(); // if the text content next to the selected radio button matches the text content of column 1 in the current csvDataArray row, then call the updateHitsCount function
+        updateHitsCount();
     } else if (selectedRadio && selectedRadio.nextElementSibling.textContent !== getValueByIndex(csvDataArray, csvRow, 1)) {
         console.log("You chose the wrong answer");
-        strikeSFX.play();
-        updateStrikesCount(); // if the text content next to the selected radio button does not match the text content of column 1 in the current csvDataArray, then call the updateStrikesCount function
+        updateStrikesCount();
     }
-    selectedRadio.checked = false; // deselect all radio buttons
+    selectedRadio.checked = false;
 }
 // Check which radio button the user had selected when they pressed "Submit Answer," and if the text content of that radio button's nextElementSibling equals
 // the correct answer (in Column 1 of that row of the csvDataArray), let the user know they got the answer correct; or if it doesn't match then let the user
 // know they got the answer wrong; or if there is no radio button selected when the user clicks "Submit Answer," let them know they need to make a selection
 
 const updateHitsCount = () => {
-    questionsDivDisappear(); // make the question text and answer buttons disappear
-    window[`team${whichTeamAtBat}Hits`]++; // increments the current team's total hits by 1
-    document.getElementById(`team${whichTeamAtBat}-hits`).innerHTML = window[`team${whichTeamAtBat}Hits`]; // displays the current team's updated total hits in the appropriate div in the DOM
-    updateTurn(); // progress to the next turn
-    swingOptionsAppear(); // make the 4 swing option buttons re-appear
-}
-
-const updateRuns = () => {
-    runSFX.play();
-    window[`team${whichTeamAtBat}RunsTotal`]++; // increase the current team's total runs by 1
-    document.getElementById(`team${whichTeamAtBat}-runs`).innerHTML = window[`team${whichTeamAtBat}RunsTotal`]; // display the value of the current team's total runs in the appropriate div in the DOM
-    window[`team${whichTeamAtBat}RunsForCurrentInning`]++; // increase the current team's runs for the current inning by 1
-    document.getElementById(`team${whichTeamAtBat}-inning${inning}`).innerHTML = window[`team${whichTeamAtBat}RunsForCurrentInning`]; // display teh value of the current team's runs for the current inning in the appropraite div in the DOM
-}
-
-const updateStrikesCount = () => {
-    questionsDivDisappear(); // make the question text and answer buttons disappear
-    if ( strikes < 2 ) {
-        strikes++; // increase the number of strikes by 1
-        document.getElementById("strikes-counter").innerHTML = strikes; // display the current number of strikes in the appropriate div in the DOM
-        swingOptionsAppear(); // make the 4 swing option buttons re-appear
-    } else {
-        updateOutsCount(); // if player is getting a 3rd strike, call function to increase outs by 1
+    questionsDivDisappear();
+    swingOptionsAppear();
+    if ( whichTeamAtBat === 1 ) {
+        team1Hits += 1;
+        document.getElementById("team1-hits").innerHTML = team1Hits;
+    } else if ( whichTeamAtBat === 2 ) {
+        team2Hits += 1;
+        document.getElementById("team2-hits").innerHTML = team2Hits;
     }
+    strikes = 0;
+    document.getElementById("strikes-counter").innerHTML = strikes;
+    updateAtBatCount();
+    console.log("the updateAtBatCount in const updateHitsCount() just got called");
+    updateBasesOccupied();
+    updateTurn();
 }
-
-const updateOutsCount = () => {
-    outSFX.play();
-    if ( outs < 2 ) {
-        outs++; // increase the number of outs by 1
-        document.getElementById("outs-counter").innerHTML = outs; // display the current number of outs in the appropriate div in the DOM
-        updateTurn();
-        swingOptionsAppear(); // make the 4 swing option buttons re-appear
-    } else {
-        updateHalfInning(); // if the player gets a 3rd out, then update to the next half-inning
-    }
-}
+// If user gets an answer correct (i.e., gets a hit), increase the current team's hits for the current inning by 1
 
 const updateTurn = () => {
-    strikes = 0; // start each new turn with 0 strikes
-    document.getElementById("strikes-counter").innerHTML = strikes; // apply the value of strikes to the appropriate div in the DOM
-    updateAtBatCount();
-    if ( turn < maxTurns ) {
-        turn++; // increase the number of the current team's turns by 1
-        document.getElementById("turns-counter").innerHTML = turn; // display the current team's turn number in the appropriate div in the DOM
-    } else {
-        updateHalfInning(); // if the number of turns is equal to the maximum number of allowable turns for a half-inning, then update to the next half-inning
+    if ( turn < 5 ) {
+        turn++;
+        document.getElementById("turns-counter").innerHTML = turn;
+    } else if (turn === 5) {
+        turn = 1;
+        document.getElementById("turns-counter").innerHTML = turn;
+        outs = 4;
+        updateOutsCount();
+    } else if ( turn = 6 ) {
+        console.log("Yep, cause of updateTurn this time was indeed a Team Switch Due To 3 Outs");
+        turn = 1;
+        document.getElementById("turns-counter").innerHTML = turn;
     }
 }
 
 const updateBasesOccupied = () => {
-    if ( baseChange === 1 ) { // if the player hits a single...
-        if ( base3Occupied === true ) { // and if there is a runner on 3rd base...
-            updateRuns(); // give the at-bat team an extra point...
-            base3Occupied = false; // because the 3rd-base runner has been pushed to home...
+    if ( swingType === "single" ) {
+        if ( base3Occupied === true ) {
+            updateRuns();
+            base3Occupied = false;
         }
-        if ( base2Occupied === true ) { // and if there is a runner on 2nd base...
+        if ( base2Occupied === true ) {
             base3Occupied = true;
-            base2Occupied = false; // push the 2nd-base runner to 3rd base...
+            base2Occupied = false;
         }
-        if ( base1Occupied === true ) { // and if there is a runner on 1st base...
-            base2Occupied = true; // push the 1st-base runner to 2nd base...
+        if ( base1Occupied === true ) {
+            base2Occupied = true;
         }
-        base1Occupied = true; // and put the new runner on 1st base...
-    } else if ( baseChange === 2 ) { // if the player hits a double...
-        if ( base3Occupied === true ) { // and if there is a runner on 3rd base...
-            updateRuns(); // give the at-bat team an extra point...
-            base3Occupied = false; // because the 3rd-base runner has been pushed to home...
+        base1Occupied = true;
+    } else if ( swingType === "double" ) {
+        if ( base3Occupied === true ) {
+            updateRuns();
+            base3Occupied = false;
         }
-        if ( base2Occupied === true ) { // and if there is a runner on 2nd base...
-            updateRuns(); // give the at-bat team an extra point...
-            base2Occupied = false; // because the 2nd-base runner has been pushed to home...
+        if ( base2Occupied === true ) {
+            updateRuns();
+            base2Occupied = false;
         }
-        if ( base1Occupied === true ) { // and if there is a runner on 1st base...
+        if ( base1Occupied === true ) {
             base3Occupied = true;
-            base1Occupied = false; // push the 1st-base runner to 3rd base...
+            base1Occupied = false;
         }
-        base2Occupied = true; // and put the new runner on 2nd base...
-    } else if ( baseChange === 3 ) { // if the player hits a triple...
-        if ( base3Occupied === true ) { // and if there is a runner on 3rd base...
-            updateRuns(); // give the at-bat team an extra point...
-            base3Occupied = false; // because the 3rd-base runner has been pushed to home
+        base2Occupied = true;
+    } else if ( swingType === "triple" ) {
+        if ( base3Occupied === true ) {
+            updateRuns();
+            base3Occupied = false;
         }
-        if ( base2Occupied === true ) { // and if there is a runner on 2nd base...
-            updateRuns(); // give the at-bat team an extra point...
-            base2Occupied = false; // because the 2nd-base runner has been pushed to home...
+        if ( base2Occupied === true ) {
+            updateRuns();
+            base2Occupied = false;
         }
-        if ( base1Occupied === true ) { // and if there is a runner on 1st base...
-            updateRuns(); // give the at-bat team an extra point...
-            base1Occupied = false; // because the 1st-base runner has been pushed to home...
+        if ( base1Occupied === true ) {
+            updateRuns();
+            base1Occupied = false;
         }
-        base3Occupied = true; // and put the new runner on 3rd base...
-    } else if ( baseChange === 4 ) { // if the player hits a home run...
-        if ( base3Occupied === true ) { // and if there is a runner on 3rd base...
-            updateRuns(); // give the at-bat team an extra point...
-            base3Occupied = false; // because the 3rd-base runner has been pushed to home...
+        base3Occupied = true;
+    } else if ( swingType === "homerun" ) {
+        if ( base3Occupied === true ) {
+            updateRuns();
+            base3Occupied = false;
         }
-        if ( base2Occupied === true ) { // and if there is a runner on 2nd base...
-            updateRuns(); // give the at-bat team an extra point...
-            base2Occupied = false; // because the 2nd-base runner has been pushed to home...
+        if ( base2Occupied === true ) {
+            updateRuns();
+            base2Occupied = false;
         }
-        if ( base1Occupied === true ) { // and if there is a runner on 1st base...
-            updateRuns(); // give the at-bat team an extra point...
-            base1Occupied = false; // because the 1st-base runner has been pushed to home...
+        if ( base1Occupied === true ) {
+            updateRuns();
+            base1Occupied = false;
         }
-        updateRuns(); // and give the at-bat team an extra point, because the new runner made it across home plate...
-    } else if ( baseChange === 5 ) { // if the bases need to be vacated...
-        base1Occupied = false; // any runner on 1st base leaves the field without scoring a run
-        base2Occupied = false; // any runner on 2nd base leaves the field without scoring a run
-        base3Occupied = false; // any runner on 3rd base leaves the field without scoring a run
+        updateRuns();
+
     }
     console.log("First Base Occupied?: " + base1Occupied + ". Second Base Occupied?: " + base2Occupied + ". Third Base Occupied?: " + base3Occupied);
 }
+
+const updateRuns = () => {
+    if ( whichTeamAtBat === 1 ) {
+        team1RunsForCurrentInning += 1;
+        team1RunsTotal += 1;
+        document.getElementById("team1-runs").innerHTML = team1RunsTotal;
+        document.getElementById(`team1-inning${inning}`).innerHTML = team1RunsForCurrentInning;
+    } else if ( whichTeamAtBat === 2 ) {
+        team2RunsForCurrentInning += 1;
+        team2RunsTotal += 1;
+        document.getElementById("team2-runs").innerHTML = team2RunsTotal;
+        document.getElementById(`team2-inning${inning}`).innerHTML = team2RunsForCurrentInning;
+    }
+}
+
+const updateStrikesCount = () => {
+    questionsDivDisappear();
+    swingOptionsAppear();
+    if ( strikes < 2 ) {
+        strikes += 1;
+    } else {
+        updateOutsCount();
+        strikes = 0;
+        updateAtBatCount();
+        console.log("the updateAtBatCount() in const updateStrikesCount just got called");
+    }
+    document.getElementById("strikes-counter").innerHTML = strikes;
+}
+// If user gets an answer wrong (i.e., gets a strike), increase the current batter's strikes by 1
+
+const updateOutsCount = () => {
+    if ( outs < 2 ) {
+        outs += 1;
+        updateTurn();
+    } else if ( outs === 2 ) {
+        console.log("Yeah, there are 3 outs now.");
+        turn = 6;
+        updateTurn();
+        updateInning();
+    } else if ( outs === 4 ) {
+        updateInning();
+    }
+    document.getElementById("outs-counter").innerHTML = outs;
+}
+// If user gets a third strike, increase the current team's outs by 1
+
+const updateInning = () => {
+    console.log("updateInning called");
+    base1Occupied = false;
+    base2Occupied = false;
+    base3Occupied = false;
+    outs = 0;
+    if ( whichTeamAtBat === 2 ) {
+        whichTeamAtBat = 1;
+        console.log("whichTeamAtBat has been switched from 2 to " + whichTeamAtBat);
+    } else if ( whichTeamAtBat === 1 ) {
+        whichTeamAtBat = 2;
+        console.log("whichTeamAtBat has been switched from 1 to " + whichTeamAtBat);
+    }
+    console.log("The inning is currently " + inning);
+    switchAtBatCount();
+    if ( inning < 10 ) {
+        if ( whichTeamAtBat === 2 ) {
+            inning++;
+            console.log("Now the inning is " + inning);
+            team1RunsForCurrentInning = 0;
+            team2RunsForCurrentInning = 0;
+            setTotals();
+        } else if ( whichTeamAtBat === 1 ) {
+            console.log("Now the inning is " + inning);
+            team1RunsForCurrentInning = 0;
+            team2RunsForCurrentInning = 0;
+            setTotals();
+        }
+    } else {
+        alert("Good game!");
+    }
+}
+// Switch to the other team and update the inning, or (if the 10th inning has just been played) end the game
