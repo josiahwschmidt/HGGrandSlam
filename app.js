@@ -1,5 +1,5 @@
 const chargeSFX = new Audio("./sfx/charge.mp3");
-const errorSFX = new Audio(".sfx/error.wav");
+const errorSFX = new Audio("./sfx/error.wav");
 const hitSFX = new Audio("./sfx/hit.wav");
 const outSFX = new Audio("./sfx/out.wav");
 const pitchSFX = new Audio("./sfx/pitch.wav");
@@ -175,7 +175,12 @@ const updateHalfInning = () => {
         window[`team${whichTeamAtBat}RunsForCurrentInning`] = 0; // set current team's runs for current inning to 0
         document.getElementById(`team${whichTeamAtBat}-inning${inning}`).innerHTML = 0; // apply the current team's runs for the current inning to the appropriate div in the DOM
         turn = 0; // take the turn count down to 0 and then...
-        updateTurn(); // call updateTurn to increase the turn count to 1 for the new team taking the field...
+        if ( inning === 1 && whichTeamAtBat === 2 ) {
+            console.log("Yes, the inning is 1 and whichTeamAtBat is 2");
+            updateTurn();
+        } else {
+            updateTurn("skip updateAtBatCount"); // call updateTurn to increase the turn count to 1 for the new team taking the field...
+        }
         outs = 0; // start each half-inning with 0 outs
         document.getElementById("outs-counter").innerHTML = outs; // apply the value of outs to the appropriate div in the DOM
         document.getElementById("at-bat-counter").innerHTML = window[`atBatTeam${whichTeamAtBat}`]; // apply the value of the current team's at-bats to the appropriate div in the DOM
@@ -323,10 +328,12 @@ const updateOutsCount = () => {
     }
 }
 
-const updateTurn = () => {
+const updateTurn = (skipUpdateAtBatCountOrNot) => {
     strikes = 0; // start each new turn with 0 strikes
     document.getElementById("strikes-counter").innerHTML = strikes; // apply the value of strikes to the appropriate div in the DOM
-    updateAtBatCount();
+    if ( skipUpdateAtBatCountOrNot !== "skip updateAtBatCount" ) {
+        updateAtBatCount();
+    }
     if ( turn < maxTurns ) {
         turn++; // increase the number of the current team's turns by 1
         document.getElementById("turns-counter").innerHTML = turn; // display the current team's turn number in the appropriate div in the DOM

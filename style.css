@@ -17,10 +17,10 @@ input[type="radio"] {
 }
 
 .baseball-diamond {
-    width: 400px;
-    height: 375px;
     background-image: url("./images/baseballdiamond.png");
     background-size: contain;
+    width: 400px;
+    height: 375px;
 }
 
 .div-table {
