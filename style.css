@@ -4,6 +4,7 @@
 
 body {
     background-color: rgb(218, 241, 231);
+    justify-content: center;
     text-align: center;
 }
 
@@ -16,11 +17,44 @@ input[type="radio"] {
     transform: scale(1.5);
 }
 
+.available-player {
+    position: relative;
+}
+
+.checkmark {
+    position: absolute;
+    top: 0px; 
+    right: 15px; 
+    font-size: 40px; 
+    color: blue; 
+    display: none; /* Initially hidden */
+}
+
+.players-grid div:hover {
+    background-color: rgb(72, 148, 72);
+    cursor: pointer;
+}
+
 .baseball-diamond {
     background-image: url("./images/baseballdiamond.png");
     background-size: contain;
+    position: relative;
     width: 400px;
     height: 375px;
+}
+
+.choose-players {
+    background-color: rgb(0, 108, 0);
+    border-style: none;
+    border-radius: 50px;
+    color: rgb(251, 249, 239);
+    display: flex;
+    justify-content: center;
+    letter-spacing: 2px;
+    line-height: 2;
+    margin: 0 auto;
+    padding: 15px;
+    width: 50%;
 }
 
 .div-table {
@@ -51,6 +85,15 @@ input[type="radio"] {
 .noninteractive-display-div {
     display: flex;
     justify-content: center;
+}
+
+.players-grid div {
+    display: inline-block;
+    max-width: 70px;
+}
+
+.players-grid img {
+    margin-bottom: -15px;
 }
 
 .scoreboard {

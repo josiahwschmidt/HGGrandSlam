@@ -6,6 +6,22 @@ const pitchSFX = new Audio("./sfx/pitch.wav");
 const runSFX = new Audio("./sfx/run.mp3");
 const strikeSFX = new Audio("./sfx/strike.wav");
 
+const availableTeammates = [
+    "./sprites/Brent front.png", // position 0
+    "./sprites/Drew front.png", // position 1
+    "./sprites/Jack front.png", // position 2
+    "./sprites/Jake front.png", // position 3
+    "./sprites/Jim front.png", // position 4
+    "./sprites/John front.png", // position 5
+    "./sprites/Josiah front.png", // position 6
+    "./sprites/Kelly front.png", // position 7
+    "./sprites/Lauren front.png", // position 8
+    "./sprites/Mike front.png", // position 9
+    "./sprites/Robin front.png" // position 10
+];
+let rosterTeam1 = [];
+let rosterTeam2 = [];
+
 let teamNamesChosen = false;
 const teamNamesSaveButton = document.getElementById("team-names-save");
 const teamNameInputsDiv = document.getElementById("team-name-inputs");
@@ -105,6 +121,47 @@ swingOptionsDiv.style.display = "none";
 questionsDiv.style.display = "none";
 // hide the Swing Options and Questions divs by default (i.e., when first loading up the app)
 
+for ( let i = 0; i < availableTeammates.length; i++ ) {
+    if ( i > 0 && i % 5 === 0 ) { // do the following after every iteration that is divisible by 5, except for the first (0th) iteration
+        document.getElementById("players-grid").innerHTML += `<br>`; // add a line break after every 5 iterations
+    }
+    document.getElementById("players-grid").innerHTML += `
+        <div class="available-player" id="available-player-${i}">
+            <img src="${availableTeammates[i]}" width="70px" height="70px"></img>
+            <strong>${availableTeammates[i].match(/\w+(?=\s+front\.png)/)}</strong>
+        </div>
+    `
+    // in the above .match method, the function is looking at the string inside of the current index position of the availableTeammates 
+    // array, and is calling .match(/ /) on that string, and looking for the word (as denoted by "\w+") that comes before the
+    // thing (as denoted by the parentheses "()") that includes a positive look-ahead (as denoted by "?=") to an empty space (as
+    // denoted by "\s+") followed immeditely by "front.png" (as denoted by "front\.png" with the "\" escaping the ".")
+}
+// run through all of the sprite filepaths in the availableTeammates array and display them in rows of 5 in the players-grid div
+
+document.getElementById("players-grid").addEventListener("click", (event) => { // add an event listener on the element with the "players-grid" id
+    if ( event.target.closest(".available-player") ) { // if the user clicks something with the class "available-player"...
+        const playerDiv = event.target.closest('.available-player'); // then put that clicked thing into a constant called playerDiv
+        console.log(`You clicked on: ${playerDiv.id}`); // see what the id number (array index number) of that particular player is
+
+        let checkmark = playerDiv.querySelector(".checkmark"); // find the first element with the class "checkmark" within playerDiv and assign it to the variable checkmark (or null if not found)
+        if ( checkmark ) { // if the checkmark variable is truthy (has something in it, and is not empty)...
+            rosterTeam2 = rosterTeam2.filter(playerId => playerId !== playerDiv.id); // then set the contents of the rosterTeam2 array to be a filtered version of itself in which each item in the array (the name "playerId" being an arbitrary name for each item in the array) is NOT equal to the id of the clicked playerDiv (in other words remove the item with that particular id from the rosterTeam2 array)
+            playerDiv.removeChild(checkmark); // remove the checkmark as a "child" of the current playerDiv
+            console.log("rosterTeam2 contains " + rosterTeam2);
+        } else {
+            rosterTeam2.push(`${playerDiv.id}`); // add the clicked player to the end of the rosterTeam2 array
+            checkmark = document.createElement("span"); // set checkmark to be a span element created in the document
+            checkmark.classList.add("checkmark"); // add the class "checkmark" to checkmark
+            checkmark.textContent = "✔"; // set the text content of checkmark to be ✔
+            playerDiv.appendChild(checkmark); // append checkmark as a "child" of the current playerDiv
+            checkmark.style.display = "block"; // make the checkmark visible
+            console.log("rosterTeam2 contains " + rosterTeam2);
+        }
+    }
+});
+// When the user clicks on a player, it adds them to the user's team and displays a checkmark over the player's sprite.
+// If the user clicks an already checkmarked sprite, the player is removed from the user's team and the checkmark disappears.
+
 const questionsDivDisappear = () => {
     questionsDiv.style.display = "none";
 }
@@ -154,8 +211,43 @@ teamNamesSaveButton.addEventListener("click", () => {
 });
 // save the team names after they have been typed in and the "Save" button has been clicked
 
+function addImageAtPosition(x, y, imageUrl, originalWidth, originalHeight) {
+    // Get the large div by its ID
+    const largeDiv = document.getElementById("baseball-diamond");
+
+    // Create an img element
+    const img = document.createElement("img");
+    img.src = imageUrl; // Set the image source (URL or relative path)
+    img.alt = "Positioned Image"; // Add alt text
+
+    // Set the style for positioning the image
+    img.style.position = "absolute";
+    img.style.left = x + "px"; // X position (horizontal)
+    img.style.top = y + "px";  // Y position (vertical)
+
+    // Double the size of the image
+    img.style.width = (originalWidth) + "px";
+    img.style.height = (originalHeight) + "px";
+
+    // Append the image to the large div
+    largeDiv.appendChild(img);
+}
+
+
 const playBall = () => {
     console.log("Play ball!");
+
+    // Call the function to place the image at coordinates (100, 150) and double the size
+    addImageAtPosition(305, 100, "./sprites/Robin front.png", 70, 70);
+    addImageAtPosition(25, 100, "./sprites/Kelly front.png", 70, 70);
+    addImageAtPosition(165, -25, "./sprites/John front.png", 70, 70);
+    addImageAtPosition(70, 20, "./sprites/Jake front.png", 70, 70);
+    addImageAtPosition(135, 275, "./sprites/Josiah front.png", 70, 70);
+    addImageAtPosition(290, 125, "./sprites/Drew front.png", 70, 70);
+    addImageAtPosition(160, 0, "./sprites/Lauren front.png", 70, 70);
+    addImageAtPosition(40, 125, "./sprites/Jack front.png", 70, 70);
+    addImageAtPosition(165, 110, "./sprites/Brent front.png", 70, 70);
+
     document.getElementById("turns-max").innerHTML = maxTurns; // apply the value of maxTurns to the appropriate div in the DOM
     updateHalfInning();
     swingOptionsAppear();
