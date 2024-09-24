@@ -19,17 +19,21 @@ const availableTeammates = [
     "./sprites/Mike front.png", // position 9
     "./sprites/Robin front.png" // position 10
 ];
+let team2RosterReady = false;
+let rosters = [];
 let rosterTeam1 = [];
 let rosterTeam2 = [];
-
+const rosterSaveButton = document.getElementById("confirm-selection");
+var team1Name;
+var team2Name;
 let teamNamesChosen = false;
-const teamNamesSaveButton = document.getElementById("team-names-save");
-const teamNameInputsDiv = document.getElementById("team-name-inputs");
+
 const swingOptionsDiv = document.getElementById("swing-options");
 const singleButton = document.getElementById("single");
 const doubleButton = document.getElementById("double");
 const tripleButton = document.getElementById("triple");
 const homerunButton = document.getElementById("homerun");
+
 const questionsDiv = document.getElementById("questions-and-answers");
 const answerButton = document.getElementById("answer-button");
 
@@ -117,6 +121,26 @@ function getValueByIndex(data, rowIndex, columnIndex) {
 }
 // function to get a certain question-and-answer set (i.e., a certain row) from the CSV data
 
+const playBall = () => {
+    console.log("Play ball!");
+
+    // Call the function to place the image at coordinates (100, 150) and double the size
+    addImageAtPosition(305, 100, "./sprites/Robin front.png", 70, 70);
+    addImageAtPosition(25, 100, "./sprites/Kelly front.png", 70, 70);
+    addImageAtPosition(165, -25, "./sprites/John front.png", 70, 70);
+    addImageAtPosition(70, 20, "./sprites/Jake front.png", 70, 70);
+    addImageAtPosition(135, 275, "./sprites/Josiah front.png", 70, 70);
+    addImageAtPosition(290, 125, "./sprites/Drew front.png", 70, 70);
+    addImageAtPosition(160, 0, "./sprites/Lauren front.png", 70, 70);
+    addImageAtPosition(40, 125, "./sprites/Jack front.png", 70, 70);
+    addImageAtPosition(165, 110, "./sprites/Brent front.png", 70, 70);
+
+    document.getElementById("turns-max").innerHTML = maxTurns; // apply the value of maxTurns to the appropriate div in the DOM
+    updateHalfInning();
+    swingOptionsAppear();
+}
+// Make the swing options appear, and start a new half-inning to kick off the game
+
 swingOptionsDiv.style.display = "none";
 questionsDiv.style.display = "none";
 // hide the Swing Options and Questions divs by default (i.e., when first loading up the app)
@@ -142,25 +166,67 @@ document.getElementById("players-grid").addEventListener("click", (event) => { /
     if ( event.target.closest(".available-player") ) { // if the user clicks something with the class "available-player"...
         const playerDiv = event.target.closest('.available-player'); // then put that clicked thing into a constant called playerDiv
         console.log(`You clicked on: ${playerDiv.id}`); // see what the id number (array index number) of that particular player is
-
         let checkmark = playerDiv.querySelector(".checkmark"); // find the first element with the class "checkmark" within playerDiv and assign it to the variable checkmark (or null if not found)
         if ( checkmark ) { // if the checkmark variable is truthy (has something in it, and is not empty)...
-            rosterTeam2 = rosterTeam2.filter(playerId => playerId !== playerDiv.id); // then set the contents of the rosterTeam2 array to be a filtered version of itself in which each item in the array (the name "playerId" being an arbitrary name for each item in the array) is NOT equal to the id of the clicked playerDiv (in other words remove the item with that particular id from the rosterTeam2 array)
+            rosters = rosters.filter(playerId => playerId !== playerDiv.id); // then set the contents of the rosterTeam2 array to be a filtered version of itself in which each item in the array (the name "playerId" being an arbitrary name for each item in the array) is NOT equal to the id of the clicked playerDiv (in other words remove the item with that particular id from the rosterTeam2 array)
             playerDiv.removeChild(checkmark); // remove the checkmark as a "child" of the current playerDiv
-            console.log("rosterTeam2 contains " + rosterTeam2);
+            console.log("rosters contains " + rosters);
         } else {
-            rosterTeam2.push(`${playerDiv.id}`); // add the clicked player to the end of the rosterTeam2 array
+            rosters.push(`${playerDiv.id}`); // add the clicked player to the end of the rosterTeam2 array
             checkmark = document.createElement("span"); // set checkmark to be a span element created in the document
             checkmark.classList.add("checkmark"); // add the class "checkmark" to checkmark
             checkmark.textContent = "✔"; // set the text content of checkmark to be ✔
             playerDiv.appendChild(checkmark); // append checkmark as a "child" of the current playerDiv
             checkmark.style.display = "block"; // make the checkmark visible
-            console.log("rosterTeam2 contains " + rosterTeam2);
+            console.log("rosters contains " + rosters);
         }
     }
 });
 // When the user clicks on a player, it adds them to the user's team and displays a checkmark over the player's sprite.
 // If the user clicks an already checkmarked sprite, the player is removed from the user's team and the checkmark disappears.
+
+rosterSaveButton.addEventListener("click", () => {
+    if ( team2RosterReady === false ) {
+        team2Name = document.getElementById("team-name-input").value;
+    } 
+    if ( team2RosterReady === true ) {
+        team1Name = document.getElementById("team-name-input").value;
+    }
+
+    if ( team2RosterReady === false && rosters.length === 5 && team2Name ) {
+        document.getElementById("choose-players-message").textContent = "GREAT! NOW CHOOSE 5 PLAYERS FOR THE SECOND TEAM:";
+        team2RosterReady = true;
+        const pickedPlayers = document.querySelectorAll(".available-player .checkmark"); // Select all checkmarks
+        pickedPlayers.forEach((eachCheckmark) => {
+            const playerDiv = eachCheckmark.closest('.available-player'); // Find the closest playerDiv
+            if (playerDiv) {
+                playerDiv.remove(); // Remove the entire playerDiv
+            }
+        });
+        
+        document.getElementById("team-name-input").value = "";
+    } else if ( team2RosterReady === false && rosters.length !== 5 && !team2Name ) {
+        alert(`You have picked ${rosters.length} players. Your team should have 5 players. Also, don't forget to name the team.`);
+    } else if ( team2RosterReady === false && rosters.length !== 5 && team2Name ) {
+        alert(`You have picked ${rosters.length} players. Your team should have 5 players.`);
+    } else if ( team2RosterReady === false && rosters.length === 5 && !team2Name ) {
+        alert("You still need to name the team!"); 
+    } else if ( team2RosterReady === true && rosters.length === 10 && team1Name ) {
+        document.getElementById("noninteractive-display-div").style.display = "flex";
+        document.getElementById("team1-name").innerHTML = team1Name.toUpperCase();
+        document.getElementById("team2-name").innerHTML = team2Name.toUpperCase();
+        teamNamesChosen = true;
+        document.getElementById("choose-players").style.display = "none";
+        playBall();
+    } else if ( team2RosterReady === true && rosters.length !== 10 && !team1Name ) {
+        alert(`You have picked ${rosters.length - 5} players. Your team should have 5 players. Also, don't forget to name the team.`);
+    } else if ( team2RosterReady === true && rosters.length !== 10 && team1Name ) {
+        alert(`You have picked ${rosters.length - 5} players. Your team should have 5 players.`);
+    } else if ( team2RosterReady === true && rosters.length === 10 && !team1Name ) {
+        alert("You still need to name the team!");
+    }
+});
+// Check if the team rosters consist of 5 players each, and if they do, allow the game to proceed
 
 const questionsDivDisappear = () => {
     questionsDiv.style.display = "none";
@@ -181,35 +247,10 @@ const swingOptionsAppear = () => {
 }
 // function to make the Swing Options div appear
 
-const teamNameInputsDisappear = () => {
-    teamNameInputsDiv.style.display = "none";
-}
-// function to make the Team Name Inputs div disappear
-const teamNameInputsAppear = () => {
-    teamNameInputsDiv.style.display = "block";
-}
-// function to make the Team Name Inputs div appear
-
 const updateAtBatCount = () => {
     window[`atBatTeam${whichTeamAtBat}`]++; // increase the at-bat count of the current team by 1
     document.getElementById("at-bat-counter").innerHTML = window[`atBatTeam${whichTeamAtBat}`]; // apply the value of the current team's at-bat count to the appropriate div in the DOM
 }
-
-teamNamesSaveButton.addEventListener("click", () => {
-    const team1Name = document.getElementById("team1-name-input").value;
-    const team2Name = document.getElementById("team2-name-input").value;
-    if ( team1Name && team2Name ) {
-        document.getElementById("team1-name").innerHTML = team1Name.toUpperCase();
-        document.getElementById("team2-name").innerHTML = team2Name.toUpperCase();
-        teamNameInputsDisappear();
-        teamNamesChosen = true;
-        playBall();
-    } else {
-        alert("You must enter a name for both teams!");
-    }
-    
-});
-// save the team names after they have been typed in and the "Save" button has been clicked
 
 function addImageAtPosition(x, y, imageUrl, originalWidth, originalHeight) {
     // Get the large div by its ID
@@ -232,27 +273,6 @@ function addImageAtPosition(x, y, imageUrl, originalWidth, originalHeight) {
     // Append the image to the large div
     largeDiv.appendChild(img);
 }
-
-
-const playBall = () => {
-    console.log("Play ball!");
-
-    // Call the function to place the image at coordinates (100, 150) and double the size
-    addImageAtPosition(305, 100, "./sprites/Robin front.png", 70, 70);
-    addImageAtPosition(25, 100, "./sprites/Kelly front.png", 70, 70);
-    addImageAtPosition(165, -25, "./sprites/John front.png", 70, 70);
-    addImageAtPosition(70, 20, "./sprites/Jake front.png", 70, 70);
-    addImageAtPosition(135, 275, "./sprites/Josiah front.png", 70, 70);
-    addImageAtPosition(290, 125, "./sprites/Drew front.png", 70, 70);
-    addImageAtPosition(160, 0, "./sprites/Lauren front.png", 70, 70);
-    addImageAtPosition(40, 125, "./sprites/Jack front.png", 70, 70);
-    addImageAtPosition(165, 110, "./sprites/Brent front.png", 70, 70);
-
-    document.getElementById("turns-max").innerHTML = maxTurns; // apply the value of maxTurns to the appropriate div in the DOM
-    updateHalfInning();
-    swingOptionsAppear();
-}
-// Make the swing options appear, and start a new half-inning to kick off the game
 
 const updateHalfInning = () => {
     if ( inning < 10 ) {

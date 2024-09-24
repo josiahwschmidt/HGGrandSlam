@@ -13,10 +13,12 @@
     <body>
         <h1 id="main-header">Welcome to H&G Grand Slam!</h1>
         <div id="choose-players" class="choose-players" style="display: block">
-            <h3>CHOOSE 5 PLAYERS FOR THE FIRST TEAM:</h3>
+            <h3 id="choose-players-message">CHOOSE 5 PLAYERS FOR THE FIRST TEAM:</h3>
             <div id="players-grid" class="players-grid"></div>
+            <h3 id="name-team-message">AND GIVE THE TEAM A NAME:</h3>
+            The <input id="team-name-input" maxlength="20" /> <button id="confirm-selection">Create Team</button>
         </div>
-        <div id="noninteractive-display-div" class="noninteractive-display-div">
+        <div id="noninteractive-display-div" class="noninteractive-display-div" style="display: none">
             <div id="baseball-diamond" class="baseball-diamond">
             </div>
             <div id="horizontal-gap"></div>
@@ -86,13 +88,6 @@
         </div>
         <div id="vertical-gap"></div>
         <div id="user-inputs-div">
-            <div id="team-name-inputs" class="stitched-baseball-div">
-                <strong>NAME YOUR TEAMS:</strong>
-                <br>
-                    The <input id="team1-name-input" maxlength="20" /> vs. the <input id="team2-name-input" maxlength="20" />
-                <br>
-                    <button id="team-names-save">SAVE</button>
-            </div>
             <div id="swing-options" class="stitched-baseball-div" style="display: none">
                 <strong>WHICH TYPE OF HIT WILL YOU TRY FOR?</strong>
                 <br><button id="single">SINGLE</button> <button id="double">DOUBLE</button> <button id="triple">TRIPLE</button> <button id="homerun">HOME RUN</button>
