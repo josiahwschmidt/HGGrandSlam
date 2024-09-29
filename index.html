@@ -11,7 +11,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     </head>
     <body>
-        <h1 id="main-header">Welcome to H&G Grand Slam!</h1>
+        <h1 id="main-header">H&G GRAND SLAM</h1>
         <div id="choose-players" class="choose-players" style="display: block">
             <h3 id="choose-players-message">CHOOSE 5 PLAYERS FOR THE FIRST TEAM:</h3>
             <div id="players-grid" class="players-grid"></div>
@@ -115,6 +115,11 @@
                 <div id="answer-button-div">
                     <button id="answer-button" name="answer-options">Submit Answer</button>
                 </div>
+            </div>
+            <div id="game-over" class="stitched-baseball-div" style="display: none">
+                <strong>GOOD GAME!</strong>
+                <br>
+                <span id="game-results">Loading Game Results...</span>
             </div>
         </div>
         <script src="app.js"></script>

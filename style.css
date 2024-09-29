@@ -24,7 +24,8 @@ button:hover {
 
 h1 {
     color: rgb(5, 47, 41);
-    letter-spacing: 2px;
+    font-size: 40px;
+    letter-spacing: 15px;
 }
 
 input[type="radio"] {

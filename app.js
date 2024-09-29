@@ -19,6 +19,7 @@ const availableTeammates = [
     "./sprites/Mike front.png", // position 9
     "./sprites/Robin front.png" // position 10
 ];
+const playerImages = {};
 let team2RosterReady = false;
 let rosters = [];
 let rosterTeam1 = [];
@@ -44,17 +45,23 @@ let base1Occupied = false;
 let base2Occupied = false;
 let base3Occupied = false;
 let baseChange;
-var team1Hits = 0;
-var team2Hits = 0;
+let dontCallSwingOptionsAppear = false;
+const imgHeightResize = 70;
+const imgWidthResize = 70;
 let inning = 0;
 let maxTurns = 5;
+var modifier = 0;
 let outs = 0;
+const runSpeed = 1500;
+let strikes = 0;
+var team1Hits = 0;
+var team2Hits = 0;
 var team1RunsForCurrentInning = 0;
 var team1RunsTotal = 0;
 var team2RunsForCurrentInning = 0;
 var team2RunsTotal = 0;
 let turn = 0;
-let strikes = 0;
+var whichBatterAtBat = 0;
 var whichTeamAtBat = 1;
 
 var chosenCsvDataArray;
@@ -319,7 +326,7 @@ question,correct,incorrect1,incorrect2,incorrect3
 "Which of these is NOT one of the St. Louis-area German-language newspapers that was once published?","Missouri Zeitung","Anzeiger des Westens","Westliche Post","Mississippi Blätter"
 "Which of these is NOT a cemetery located in St. Louis?","Borromeo","Calvary","Chesed Shel Emeth","Holy Cross"
 "What was the term for the legal doctrine that transferred a married woman's legal rights to her husband?","Couverture","Lex Loci","Usufruct","Ex Parte"
-"In what year did naturalization documents begin to record detailed biographical information about the immigrant?","1906","1890","1900","1886"
+"In what year did U.S. naturalization documents begin to record detailed biographical information about the immigrant?","1906","1890","1900","1886"
 "Historically speaking, what percentage of estates left behind by a deceased American adult had a will?","10-15%","25-30%","45-55%","65-75%"
 "Statistically speaking, in which of these geographic areas are you most likely to find a written will for an ancestor?","Rural areas","Urban areas","The Midwest","The South"
 "Which of these are NOT likely to be found in a deceased person's probate case files?","Death certificate","Letters of administration","Personal property inventory","Minute book"
@@ -367,7 +374,7 @@ question,correct,incorrect1,incorrect2,incorrect3
 "What is a holograph?","A document signed in the document creator's own hand","A letter obtained from the government giving someone the right to dwell on and improve new land","Property or money bequeathed to someone in a will","A 3D projection of an ancestor's image"
 "What does the term 'instant' mean in a historical document?","in this same month","in this same year","on this same day","scheduled to happen within the next week"
 "What court document officially authorizes an executor named in a will to carry out his or her duty?","letters testamentary","manse","letters patent","quit claim"
-"What does the historical term 'liber' mean?","Book of public records","Collection of wills","Letter emancipating an enslaved person","Cause of death"
+"What does the historical term 'liber' mean?","Book of public records","Collection of wills","Letter emancipating an enslaved person","Hybrid of a lion and a tiger"
 "Which term means 'notices of lawsuits awaiting litigation, usually in matters concerning land'?","lis pendens","liber","bann","relicta"
 "'Old Dominion' is a nickname for which state?","Virginia","Pennsylvania","Ohio","New York"
 "What is the study of old handwriting styles called?","paleography","archaeography","paleology","geriography"
@@ -406,7 +413,7 @@ question,correct,incorrect1,incorrect2,incorrect3
 "Which of these is NOT a Jewish genealogical source?","Chametz","Ketubah","Get","Hesped"
 "What is the Arabic term for a genealogy or family history?","Ilm Al Ansab","Rukhsat Alzawaj","Shakwaa","Tasrih Aldafn"
 "What does SNP stand for in genetic genealogy?","Single nucleotide polymorphism","Substituted nucleic profile","Standard nuclear pairing","Standard nucleotide polysaccharide"
-"In genetic genealogy, what is the mutation marker that DNA tests look for?","SNP","STP","SNO","SPN"
+"In genetic genealogy, what is the mutation marker that most DNA tests look for?","SNP","STP","SNO","SPN"
 "Who was responsible for writing Norwegian bygdebøker?","Local history groups","Vital record registrars","Wealthy local families","The Norwegian census bureau"
 "In which year did the U.S. census record if someone was currently sick at the time of the census, and list what their specific ailment was?","1880","1900","1870","1910"
 "Which state census asked for the full birth-names of every individual's father and mother?","1925 Iowa census","1876 Missouri census","1865 Illinois census","1901 Indiana census"
@@ -420,14 +427,14 @@ question,correct,incorrect1,incorrect2,incorrect3
 "Which of these types of genetic mutations are the most precise and useful for a genealogist?","SNP","STR","Y-STR","APOE"
 "Who became the first Black mayor of St. Louis in 1993?","Freeman Bosley Jr.","Clarence Harmon","James F. Conway","Alfonso Cervantes"
 "Who was the first governor of the state of Missouri?","Alexander McNair","William Clark","Frederick Bates","Bernardo de Galvez"
-"In which year did the U.S. Census Bureau have to redo its enumeration of St. Louis due to concerns of inaccuracy?","1880","1890","1870","1900"
+"In which year did the U.S. Census Bureau have to redo its enumeration of St. Louis due to concerns of inaccuracy in the first attempt?","1880","1890","1870","1900"
 "St. Louis's 1916 housing segregation law prohibited Black people from moving into neighborhoods that were at least what percentage White?","75%","90%","50%","67%"
 "Which 5 indigenous American groups were referred to as 'the Five Civilized Tribes'?","Cherokee, Chickasaw, Choctaw, Creek, Seminole","Caddo, Cherokee, Hopi, Iroquois, Muscogee","Apache, Inuit, Seminole, Sioux, Yaqui","Cayuga, Mohawk, Onondoga, Seneca, Wampanoag"
 "In what year did the US Census Bureau officially add 'Indian' as a racial category on the census?","1870","1860","1850","1840"
 "During what years were Native Americans recorded in the Dawes Rolls?","1898-1914","1901-1920","1879-1898","1893-1898"
 "What was the first year that the U.S. census enumerated Native Americans in the Indian Territory?","1900","1910","1890","1880"
 "Which organization keeps all of the records of the Dawes Commission?","NARA","US Census Bureau","Bureau of Indian Affairs","Library of Congress"
-"In what year did the Ellis Island immigration center open?","1900","1902","1898","1904"
+"In what year did the current Ellis Island immigration center open?","1900","1902","1898","1904"
 "In what year did women start being naturalized as US citizens separately from their husbands?","1922","1930","1911","1906"
 "What year did West Virginia secede from the state of Virginia?","1863","1864","1865","1866"
 "From what point onward are surviving German church records most commonly available?","1648, following the end of the Thirty Years' War","1748, following the end of the War of the Austrian Succession","1763, following the end of the Seven Years' War","1815, following the end of the Napoleonic Wars"
@@ -452,7 +459,7 @@ question,correct,incorrect1,incorrect2,incorrect3
 "What is the Danish term for a probate inventory?","skifte","fødsel","ægteskab","død"
 "In what year did civil registration of vital events begin in the Netherlands?","1811","1894","1772","1640"
 "Who was the Jesuit priest who helped build support for the American Revolutionary cause among the French inhabitants of St. Louis?","Pierre Gibault","Michel Baudouin","Hyacinthe d'Avrigny","Aloysius Bellecius"
-"Which president came to St. Louis to become the first U.S. president ever to fly in an airplane","Theodore Roosevelt","William McKinley","William Howard Taft","Calvin Coolidge"
+"Which president came to St. Louis to become the first U.S. president ever to fly in an airplane?","Theodore Roosevelt","William McKinley","William Howard Taft","Calvin Coolidge"
 "What is the series of books compiled from 1765-1804, which record land grants in Missouri made by the French and Spanish governments?","Livre Terrein","Archives Territoriales","Recueil des Concessions Foncières","Registre Foncier du Missouri"
 "What unit of land measurement was equivalent to about 3 miles in English units, or 84 square arpents in French units?","a league","a fathom","a plat","a parcel"
 "Who was the trading post proprietor who canoed hundreds of miles down the Mississippi River to warn St. Louis of the impending British attack during the Revolutionary War?","Madame Honoré","Jean Baptiste Point du Sable","Oliver Pollock","Henry Hastings Sibley"
@@ -460,7 +467,7 @@ question,correct,incorrect1,incorrect2,incorrect3
 "In German Protestant christenings prior to the late 1800s, a baby was almost always named after its:","Baptism sponsor(s)","Parent","Grandparent","Officiating pastor"
 "What is the name of the database you can use to look up the cause of death corresponding to the numerical code on most 20th-century civil death certificates?","International Classification of Diseases","AMA Database","Repository of Causes of Death","Physicians' Codes Manual"
 "What year is printed on the state seal of Missouri?","1820","1821","1865","1776"
-"Why is 1821 printed on the state seal of Missouri?","It was the year Missouri adopted its first constitution","It was the year Missouri became a state","It was the year Missouri first submitted its petition for statehood","It was the year the United States acquired the land that would become Missouri"
+"Why is 1820 printed on the state seal of Missouri?","It was the year Missouri adopted its first constitution","It was the year Missouri became a state","It was the year Missouri first submitted its petition for statehood","It was the year the United States acquired the land that would become Missouri"
 "Which of these is NOT one of the small, ethnically-German countries that existed before Germany became a single, unified state?","Friesland","Hessen-Kassel","Grand Duchy of Baden","Sachsen-Weimar-Eisenach"
 "What year were roll-film cameras invented?","1888","1900","1837","1851"
 "What year were Collodion photographs invented, resulting in exposure times that only took 2-3 seconds?","1851","1888","1837","1864"
@@ -472,7 +479,7 @@ question,correct,incorrect1,incorrect2,incorrect3
 "Which term means 'an inheritance having no limitations or conditions in its use'?","fee simple","instant","nuncupative","holograph"
 "If a DNA test-taker has a 3,500 centimorgan match with another test-taker, what relationship must that necessarily be?","parent/child","full siblings","grandparent/grandchild","half siblings"
 "If a DNA test-taker shares 1,600 centimorgans of DNA with their sibling, what does that indicate?","They are actually half-siblings","They are indeed full siblings","They are actually uncle/aunt and nephew/niece","They are identical twins"
-"In German, what is a 'Rufname'?","The name (whether first or middle) that a person chose to be called by","An inherited farmstead","A traveling clergyman who performed sacraments in underserved areas","A letter authorizing a peasant to relocate from one area to another"
+"In German, what is a 'Rufname'?","The name (whether first or middle) that a person chose to be called by","An inherited farmstead","A traveling clergyman who performed sacraments in under-served areas","A letter authorizing a peasant to relocate from one area to another"
 "What is an oral will declared or dictated out loud by a dying person that is afterwards put into writing by witnesses?","nuncupative will","unsolemn will","holographic will","cupative will"
 "What does the archaic term 'octoroon' indicate?","That someone had one Black great-grandparent","That someone had one Black grandparent","That someone had two Black grandparents","That someone had one Black great-great-grandparent"
 "What is the English translation of the German term 'Pfalz'?","Palatinate","Falls","Pomerania","Franconia"
@@ -505,22 +512,11 @@ Papa.parse(csvData4, {
 csvDataArraysArray = [csvDataArray1, csvDataArray2, csvDataArray3, csvDataArray4];
 // Create an array of the four csvDataArray's
 
-function getValueByIndex(data, rowIndex, columnIndex) {
-    if (rowIndex < data.length && columnIndex < Object.keys(data[0]).length) { // Check if the rowIndex and columnIndex are within bounds
-        const row = data[rowIndex];
-        const columnName = Object.keys(row)[columnIndex]; // Get the column name from the index
-        return row[columnName]; // Return the value at the specified row and column
-    }
-    return null; // Return null if indices are out of bounds
-}
-// function to get a certain question-and-answer set (i.e., a certain row) from the CSV data
-
 const playBall = () => {
     console.log("Play ball!");
 
     document.getElementById("turns-max").innerHTML = maxTurns; // apply the value of maxTurns to the appropriate div in the DOM
     updateHalfInning();
-    swingOptionsAppear();
 }
 // Make the swing options appear, and start a new half-inning to kick off the game
 
@@ -534,7 +530,7 @@ for ( let i = 0; i < availableTeammates.length; i++ ) {
     }
     document.getElementById("players-grid").innerHTML += `
         <div class="available-player" id="available-player-${i}">
-            <img src="${availableTeammates[i]}" width="70px" height="70px"></img>
+            <img src="${availableTeammates[i]}" width="${imgWidthResize}px" height="${imgHeightResize}px"></img>
             <strong>${availableTeammates[i].match(/\w+(?=\s+front\.png)/)}</strong>
         </div>
     `
@@ -635,7 +631,17 @@ const updateAtBatCount = () => {
     document.getElementById("at-bat-counter").innerHTML = window[`atBatTeam${whichTeamAtBat}`]; // apply the value of the current team's at-bat count to the appropriate div in the DOM
 }
 
-function addImageAtPosition(x, y, imageUrl, originalWidth, originalHeight) {
+function getValueByIndex(data, rowIndex, columnIndex) {
+    if (rowIndex < data.length && columnIndex < Object.keys(data[0]).length) { // Check if the rowIndex and columnIndex are within bounds
+        const row = data[rowIndex];
+        const columnName = Object.keys(row)[columnIndex]; // Get the column name from the index
+        return row[columnName]; // Return the value at the specified row and column
+    }
+    return null; // Return null if indices are out of bounds
+}
+// function to get a certain question-and-answer set (i.e., a certain row) from the CSV data
+
+function addImageAtPosition(x, y, imageUrl, width, height) {
     // Get the large div by its ID
     const largeDiv = document.getElementById("baseball-diamond");
 
@@ -646,33 +652,109 @@ function addImageAtPosition(x, y, imageUrl, originalWidth, originalHeight) {
 
     // Set the style for positioning the image
     img.style.position = "absolute";
-    img.style.left = x + "px"; // X position (horizontal)
-    img.style.top = y + "px";  // Y position (vertical)
+    img.style.left = `${x}px`; // X position (horizontal)
+    img.style.top = `${y}px`;  // Y position (vertical)
 
-    // Double the size of the image
-    img.style.width = (originalWidth) + "px";
-    img.style.height = (originalHeight) + "px";
+    // Increase the size of the image
+    img.style.width = `${width}px`;
+    img.style.height = `${height}px`;
 
     // Append the image to the large div
     largeDiv.appendChild(img);
+
+    return img;
+}
+
+function moveImageOverTime(image, startX, startY, endX, endY, duration) {
+    return new Promise((resolve) => {
+        const startTime = performance.now(); // Get the start time
+
+        function animate(time) {
+            const elapsedTime = time - startTime;
+            const progress = Math.min( elapsedTime / duration, 1 ) // Math.min returns whichever is smaller: the ratio of elapsedTime / duration (which could be as small as 0/5000 when the animation first starts, or as big as 5000/5000 or higher at the end of the animation), or the number 1 (which is equal to 5000/5000). This makes sure that the progress value of the animation never goes beyond 1 (which should be the end point for an animation).
+
+            // the below calculates the current position of the img using linear interpolation
+            const currentX = startX + (endX - startX) * progress; // This calculates the range from startX to endX (i.e., the number of pixels the img needs to traverse on the X axis), multiples that range by the current progress ratio, and then adds the number of pixels the img has so far traversed on the X axis to the absolute pixel position where the img started on the X axis -- this gives us the current absolute pixel position of the img on the X axis
+            const currentY = startY + (endY - startY) * progress; // This does the same as the above line but for the Y axis
+
+            // the below actually updates the image's displayed position
+            image.style.left = `${currentX}px`;
+            image.style.top = `${currentY}px`;
+
+            // if the animation is not complete, the below requests the next animation frame
+            if ( progress < 1 ) {
+                requestAnimationFrame(animate);
+            } else {
+                resolve(); // Resolve the promise when the animation is complete
+            }
+        }
+
+        // the below starts the animation from the beginning
+        requestAnimationFrame(animate);
+    });
 }
 
 /*
     // Call the function to place images at coordinates and increase the size
     addImageAtPosition(165, 110, `${availableTeammates[0]}`, 70, 70); // send defensive player to pitcher's mound
     addImageAtPosition(305, 100, `${availableTeammates[8]}`, 70, 70); // send defensive player to 1st base
-    addImageAtPosition(25, 100, `${availableTeammates[7]}`, 70, 70); // send defensive player to 3rd base
     addImageAtPosition(165, -25, `${availableTeammates[6]}`, 70, 70); // send defensive player to 2nd base
     addImageAtPosition(70, 20, `${availableTeammates[5]}`, 70, 70); // send defensive player to short stop
+    addImageAtPosition(25, 100, `${availableTeammates[7]}`, 70, 70); // send defensive player to 3rd base
     addImageAtPosition(135, 275, `${availableTeammates[4]}`, 70, 70); // send offensive player to home plate
     addImageAtPosition(290, 125, `${availableTeammates[3]}`, 70, 70); // send offensive player to 1st base
     addImageAtPosition(160, 0, `${availableTeammates[2]}`, 70, 70); // send offensive player to 2nd base
     addImageAtPosition(40, 125, `${availableTeammates[1]}`, 70, 70); // send offensive player to 3rd base
 */
 
-const updateHalfInning = () => {
-    if ( inning < 10 ) {
-        addImageAtPosition(-100, 400, `${availableTeammates[0]}`, 70, 70);
+const updateHalfInning = async () => {
+    if ( inning < 10 || (inning === 10 && whichTeamAtBat === 2) ) {
+
+        if ( inning !== 0 ) {
+            await Promise.all([
+                moveImageOverTime(playerImages.firstBaseman, 305, 100, -80, 400, runSpeed),
+                moveImageOverTime(playerImages.pitcher, 165, 110, -100, 400, runSpeed),
+                moveImageOverTime(playerImages.secondBaseman, 165, -25, -120, 400, runSpeed),
+                moveImageOverTime(playerImages.shortstop, 70, 20, -140, 400, runSpeed),
+                moveImageOverTime(playerImages.thirdBaseman, 25, 100, -160, 400, runSpeed)
+            ]);
+
+            // After the players have moved back to the "dugout" area, remove their images from the DOM
+            playerImages.firstBaseman.remove();
+            playerImages.pitcher.remove();
+            playerImages.secondBaseman.remove();
+            playerImages.shortstop.remove();
+            playerImages.thirdBaseman.remove();
+        }
+
+        if ( whichTeamAtBat === 2 ) {
+            modifier = 5; // if the second team is at bat and the first team is defending, send teammates 0-4 into defensive positions on the field
+        } else if ( whichTeamAtBat === 1 ) {
+            modifier = 0; // otherwise, if the first team is at bat and the second team is defending, send teammates 5-9 into defensive positions on the field
+        }
+
+        playerImages.firstBaseman = addImageAtPosition(-80, 400, `${availableTeammates[1 + modifier]}`, imgWidthResize, imgHeightResize);
+        playerImages.pitcher = addImageAtPosition(-100, 400, `${availableTeammates[0 + modifier]}`, imgWidthResize, imgHeightResize);
+        playerImages.secondBaseman = addImageAtPosition(-120, 400, `${availableTeammates[2 + modifier]}`, imgWidthResize, imgHeightResize);
+        playerImages.shortstop = addImageAtPosition(-140, 400, `${availableTeammates[3 + modifier]}`, imgWidthResize, imgHeightResize);
+        playerImages.thirdBaseman = addImageAtPosition(-160, 400, `${availableTeammates[4 + modifier]}`, imgWidthResize, imgHeightResize);
+        // If player images have not been created yet, then create them at their starting (i.e. dugout) positions
+
+        await Promise.all([
+            moveImageOverTime(playerImages.firstBaseman, -80, 400, 305, 100, runSpeed),
+            moveImageOverTime(playerImages.pitcher, -100, 400, 165, 110, runSpeed),
+            moveImageOverTime(playerImages.secondBaseman, -120, 400, 165, -25, runSpeed),
+            moveImageOverTime(playerImages.shortstop, -140, 400, 70, 20, runSpeed),
+            moveImageOverTime(playerImages.thirdBaseman, -160, 400, 25, 100, runSpeed)
+        ]);
+        // Move the players to their field positions
+
+        whichBatterAtBat = 5 - modifier;
+        playerImages.batter = addImageAtPosition(-60, 400, `${availableTeammates[whichBatterAtBat]}`, imgWidthResize, imgHeightResize);
+        await Promise.all([
+            moveImageOverTime(playerImages.batter, -60, 400, 135, 275, runSpeed)
+        ]);
+        // Create an image for the new batter and then move them up to batting position
 
         baseChange = 5;
         updateBasesOccupied();
@@ -696,14 +778,19 @@ const updateHalfInning = () => {
         document.getElementById("at-bat-counter").innerHTML = window[`atBatTeam${whichTeamAtBat}`]; // apply the value of the current team's at-bats to the appropriate div in the DOM
         document.getElementById(`team${whichTeamAtBat}-runs`).innerHTML = window[`team${whichTeamAtBat}RunsTotal`]; // apply the value of the current team's total runs to the appropriate div in the DOM
         document.getElementById(`team${whichTeamAtBat}-hits`).innerHTML = window[`team${whichTeamAtBat}Hits`]; // apply the value of the current team's total hits to the appropriate value in the DOM
+        dontCallSwingOptionsAppear = false;
         swingOptionsAppear(); // make the 4 swing option buttons re-appear
     } else if ( inning === 10 && whichTeamAtBat === 1 ) {
-        alert("Good game!");
+        document.getElementById("game-over").style.display = "block";
+        if ( team1RunsTotal === team2RunsTotal ) {
+            document.getElementById("game-results").textContent = "The game ended in a tie!";
+        } else if ( team1RunsTotal > team2RunsTotal ) {
+            document.getElementById("game-results").textContent = `${team1Name} won the game!`;
+        } else if ( team2RunsTotal > team1RunsTotal ) {
+            document.getElementById("game-results").textContent = `${team2Name} won the game!`;
+        }
+        
     }
-}
-
-const putDefensiveTeamOnField = () => {
-
 }
 
 singleButton.addEventListener("click", () => {
@@ -794,6 +881,10 @@ const correctOrIncorrect = () => {
         hitSFX.play();
         updateBasesOccupied(); // make sure that the appropriate bases get occupied or vacated depending on which bases were currently occupied + the power of the hit
         updateHitsCount(); // if the text content next to the selected radio button matches the text content of column 1 in the current csvDataArray row, then call the updateHitsCount function
+
+        if ( dontCallSwingOptionsAppear === false ) {
+            swingOptionsAppear();
+        }
     } else if (selectedRadio && selectedRadio.nextElementSibling.textContent !== getValueByIndex(chosenCsvDataArray, csvRow, 1)) {
         console.log("You chose the wrong answer");
         strikeSFX.play();
@@ -810,7 +901,6 @@ const updateHitsCount = () => {
     window[`team${whichTeamAtBat}Hits`]++; // increments the current team's total hits by 1
     document.getElementById(`team${whichTeamAtBat}-hits`).innerHTML = window[`team${whichTeamAtBat}Hits`]; // displays the current team's updated total hits in the appropriate div in the DOM
     updateTurn(); // progress to the next turn
-    swingOptionsAppear(); // make the 4 swing option buttons re-appear
 }
 
 const updateRuns = () => {
@@ -854,11 +944,15 @@ const updateTurn = (skipUpdateAtBatCountOrNot) => {
         turn++; // increase the number of the current team's turns by 1
         document.getElementById("turns-counter").innerHTML = turn; // display the current team's turn number in the appropriate div in the DOM
     } else {
+        alert("dontCallSwingOptionsAppear is getting set to true now");
+        dontCallSwingOptionsAppear = true;
         updateHalfInning(); // if the number of turns is equal to the maximum number of allowable turns for a half-inning, then update to the next half-inning
     }
 }
 
 const updateBasesOccupied = () => {
+    
+
     if ( baseChange === 1 ) { // if the player hits a single...
         if ( base3Occupied === true ) { // and if there is a runner on 3rd base...
             updateRuns(); // give the at-bat team an extra point...
@@ -919,5 +1013,6 @@ const updateBasesOccupied = () => {
         base2Occupied = false; // any runner on 2nd base leaves the field without scoring a run
         base3Occupied = false; // any runner on 3rd base leaves the field without scoring a run
     }
+
     console.log("First Base Occupied?: " + base1Occupied + ". Second Base Occupied?: " + base2Occupied + ". Third Base Occupied?: " + base3Occupied);
 }
